@@ -3,6 +3,24 @@ import { Request, Response } from "express";
 import knex from "../database/connection";
 
 class LocalsController {
+  async index(req: Request, res: Response) {
+    const { city, uf, items } = req.query;
+
+    const parsedItems = String(items)
+      .split(",")
+      .map((item) => Number(item.trim()));
+
+    const locals = await knex("locals")
+      .join("items_locals", "locals.id", "=", "items_locals.locals_id")
+      .whereIn("items_locals.items_id", parsedItems)
+      .where("city", String(city))
+      .where("uf", String(uf))
+      .distinct()
+      .select("locals.*");
+
+    return res.json(locals);
+  }
+
   async show(req: Request, res: Response) {
     const { id } = req.params;
 
@@ -19,10 +37,7 @@ class LocalsController {
       .where("items_locals.locals_id", id)
       .select("items.title");
 
-    return res.json({
-      local,
-      item,
-    });
+    return res.json({ local, item });
   }
 
   async create(req: Request, res: Response) {
@@ -48,18 +63,19 @@ class LocalsController {
       uf,
     };
 
-    const insertedIds = await knex("locals").insert(locals);
+    const trx = await knex.transaction();
+
+    const insertedIds = await trx("locals").insert(locals);
 
     const locals_id = insertedIds[0];
 
     const itemsLocals = items.map((items_id: number) => {
-      return {
-        items_id,
-        locals_id,
-      };
+      return { items_id, locals_id };
     });
 
-    await knex("items_locals").insert(itemsLocals);
+    await trx("items_locals").insert(itemsLocals);
+
+    await trx.commit();
 
     return res.json({
       id: locals_id,

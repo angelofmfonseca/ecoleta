@@ -11,6 +11,7 @@ const itemsController = new ItemsController();
 routes.get("/items", itemsController.index);
 
 routes.post("/locals", localsController.create);
+routes.get("/locals", localsController.index);
 routes.get("/locals/:id", localsController.show);
 
 export default routes;
