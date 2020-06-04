@@ -1,8 +1,10 @@
 import express from "express"
 
 import knex from "./database/connection"
+import LocalsController from "./controllers/LocalsController"
 
 const routes = express.Router()
+const localsController = new LocalsController()
 
 routes.get("/items", async (req, res) => {
   const items = await knex("items").select("*")
@@ -17,41 +19,6 @@ routes.get("/items", async (req, res) => {
   return res.json(serializedItems)
 })
 
-routes.post("/locals", async (req, res) => {
-  const {
-    name,
-    email,
-    whatsapp, 
-    latitude,
-    longitude,
-    city, 
-    uf,
-    items
-  } = req.body;
-
-  const insertedIds = await knex("locals").insert({
-    image: "image-fake",
-    name,
-    email,
-    whatsapp, 
-    latitude,
-    longitude,
-    city, 
-    uf
-  })
-
-  const locals_id = insertedIds[0]
-
-  const itemsLocals = items.map((items_id: number) => {
-    return {
-      items_id,
-      locals_id
-    }
-  })
-  
-  await knex("items_locals").insert(itemsLocals)
-
-  return res.json({ success: true })
-})
+routes.post("/locals", localsController.create)
 
 export default routes
