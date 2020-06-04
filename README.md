@@ -1,3 +1,0 @@
-# ecoleta
-# ecoleta
-# ecoleta
