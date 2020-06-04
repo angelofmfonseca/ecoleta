@@ -1,23 +1,14 @@
 import express from "express"
 
-import knex from "./database/connection"
 import LocalsController from "./controllers/LocalsController"
+import ItemsController from "./controllers/ItemsController"
 
 const routes = express.Router()
+
 const localsController = new LocalsController()
+const itemsController = new ItemsController()
 
-routes.get("/items", async (req, res) => {
-  const items = await knex("items").select("*")
-
-  const serializedItems = items.map(item => {
-    return {
-      id: item.id,
-      title: item.title,
-      image_url: `http://localhost:3333/uploads/${ item.image }`
-    }
-  })
-  return res.json(serializedItems)
-})
+routes.get("/items", itemsController.index)
 
 routes.post("/locals", localsController.create)
 

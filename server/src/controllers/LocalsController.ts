@@ -14,8 +14,8 @@ class LocalsController{
       uf,
       items
     } = req.body;
-  
-    const insertedIds = await knex("locals").insert({
+
+    const locals = {
       image: "image-fake",
       name,
       email,
@@ -24,7 +24,9 @@ class LocalsController{
       longitude,
       city, 
       uf
-    })
+    }
+  
+    const insertedIds = await knex("locals").insert(locals)
   
     const locals_id = insertedIds[0]
   
@@ -37,7 +39,10 @@ class LocalsController{
     
     await knex("items_locals").insert(itemsLocals)
   
-    return res.json({ success: true })
+    return res.json({
+      id: locals_id,
+      ...locals
+    })
   }
 }
 
